@@ -16,6 +16,7 @@ from app.models import (
     EmailStatus,
     SuppressionEntry,
     Template,
+    User,
 )
 from app.queue.producer import enqueue_send_email
 
