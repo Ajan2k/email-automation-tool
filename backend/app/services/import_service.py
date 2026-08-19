@@ -1,11 +1,17 @@
-"""Excel/CSV → validated preview → bulk insert into PostgreSQL."""
+"""Excel/CSV → column mapping → validated preview → bulk insert into PostgreSQL.
+
+Supports both the generic layout (first_name, last_name, email, company, …)
+and the Decision_Makers.xlsx layout (work_email, emails, job_company_name,
+linkedin_url, location_country, skills, …) via app.utils.column_mapping.
+"""
 from dataclasses import dataclass, field
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Company, Contact, ImportJob, ImportStatus
-from app.utils.email_validation import is_valid_email, normalize_email
+from app.utils.column_mapping import normalize_contact_row
+from app.utils.email_validation import is_valid_email
 from app.utils.excel_parser import parse_contact_file
 
 
@@ -19,19 +25,25 @@ class ImportPreview:
     errors: list[dict] = field(default_factory=list)
 
 
-def validate_rows(db: Session, owner_id: int, rows: list[dict]) -> ImportPreview:
-    preview = ImportPreview(total=len(rows))
-    existing = {
+def _existing_emails(db: Session, owner_id: int) -> set[str]:
+    return {
         e[0]
         for e in db.execute(select(Contact.email).where(Contact.owner_id == owner_id)).all()
     }
+
+
+def validate_rows(db: Session, owner_id: int, rows: list[dict]) -> ImportPreview:
+    preview = ImportPreview(total=len(rows))
+    existing = _existing_emails(db, owner_id)
     seen_in_file: set[str] = set()
 
-    for idx, row in enumerate(rows, start=2):  # header is row 1
-        email = normalize_email(row.get("email", ""))
+    for idx, raw in enumerate(rows, start=2):  # header is row 1
+        row = normalize_contact_row(raw)
+        email = row["email"]
         if not is_valid_email(email):
             preview.invalid += 1
-            preview.errors.append({"row": idx, "error": f"Invalid email: {row.get('email', '')!r}"})
+            source = raw.get("work_email") or raw.get("emails") or raw.get("email") or ""
+            preview.errors.append({"row": idx, "error": f"No valid email found: {source!r}"})
             continue
         if email in existing or email in seen_in_file:
             preview.duplicates += 1
@@ -39,7 +51,7 @@ def validate_rows(db: Session, owner_id: int, rows: list[dict]) -> ImportPreview
         seen_in_file.add(email)
         preview.valid += 1
         if len(preview.rows) < 20:
-            preview.rows.append({**row, "email": email})
+            preview.rows.append(row)
 
     return preview
 
@@ -58,19 +70,17 @@ def run_import(db: Session, owner_id: int, filename: str, content: bytes) -> Imp
         job.duplicate_rows = preview.duplicates
 
         company_cache: dict[str, Company] = {}
-        existing = {
-            e[0]
-            for e in db.execute(select(Contact.email).where(Contact.owner_id == owner_id)).all()
-        }
+        existing = _existing_emails(db, owner_id)
         imported = 0
-        for row in rows:
-            email = normalize_email(row.get("email", ""))
+        for raw in rows:
+            row = normalize_contact_row(raw)
+            email = row["email"]
             if not is_valid_email(email) or email in existing:
                 continue
             existing.add(email)
 
             company = None
-            company_name = (row.get("company") or "").strip()
+            company_name = row["company"]
             if company_name:
                 key = company_name.lower()
                 company = company_cache.get(key)
@@ -84,8 +94,8 @@ def run_import(db: Session, owner_id: int, filename: str, content: bytes) -> Imp
                         company = Company(
                             owner_id=owner_id,
                             name=company_name,
-                            website=row.get("website", ""),
-                            industry=row.get("industry", ""),
+                            website=row["website"],
+                            industry=row["industry"],
                         )
                         db.add(company)
                         db.flush()
@@ -97,12 +107,18 @@ def run_import(db: Session, owner_id: int, filename: str, content: bytes) -> Imp
                     import_job_id=job.id,
                     company_id=company.id if company else None,
                     email=email,
-                    first_name=row.get("first_name", ""),
-                    last_name=row.get("last_name", ""),
-                    job_title=row.get("job_title", ""),
-                    website=row.get("website", ""),
-                    linkedin=row.get("linkedin", ""),
-                    industry=row.get("industry", ""),
+                    first_name=row["first_name"],
+                    last_name=row["last_name"],
+                    full_name=row["full_name"],
+                    gender=row["gender"],
+                    job_title=row["job_title"],
+                    company_size=row["company_size"],
+                    website=row["website"],
+                    linkedin=row["linkedin"],
+                    industry=row["industry"],
+                    country=row["country"],
+                    phone=row["phone"],
+                    skills=row["skills"],
                 )
             )
             imported += 1

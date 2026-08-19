@@ -74,10 +74,15 @@ def preview_template(
         variables = {
             "first_name": "Sarah",
             "last_name": "Chen",
+            "full_name": "Sarah Chen",
             "company_name": "ABC AI",
             "job_title": "CTO",
             "website": "https://abc.ai",
             "industry": "Artificial Intelligence",
+            "country": "Canada",
+            "company_size": "1001-5000",
+            "skills": "machine learning;product strategy",
+            "phone": "+14165550100",
             "email": "sarah@abc.ai",
         }
     return {

@@ -49,11 +49,29 @@ QUEUED → PROCESSING → SENT → (DELIVERED | BOUNCED)
              └→ retry (max 3) → FAILED
 ```
 
-## AI reply pipeline
+## Import column mapping (Decision_Makers.xlsx)
+
+`app/utils/column_mapping.py` normalizes real-world exports before insert:
+
+| Source column(s) | Canonical field | Rule |
+|---|---|---|
+| `work_email` > `emails` > `email` | `email` | work_email preferred (direct corporate); `emails` may be a `;`-list → first valid wins |
+| `first_name` + `full_name` | `first_name`, `last_name`, `full_name` | lowercase → Title Case; last name derived from full_name |
+| `job_company_name` | company | Title Case, deduped into `companies` table |
+| `job_company_size` | `company_size` | kept as bracket (`1001-5000`, `5001-10000`, `10001+`) |
+| `job_company_website` | `website` | as-is |
+| `linkedin_url` | `linkedin` | `https://` prefixed |
+| `location_country` > `countries` | `country` | first of `;`-list as fallback |
+| `mobile_phone` > `phone_numbers` | `phone` | float artifact `.0` stripped, `+` prefixed |
+| `skills` | `skills` | `;`-separated string kept verbatim |
+| `gender`, `industry`, `job_title` | same | Title Case where all-lowercase |
+
+## AI reply pipeline (Groq)
 
 ```
 Inbound webhook → thread matching → conversation
-     → LLM (structured JSON: classification, draft, reason, needs_human)
+     → Groq (llama-3.3-70b-versatile, OpenAI-compatible /chat/completions,
+        structured JSON: classification, draft, reason, needs_human)
      → keyword safety net (legal/pricing/refund/unsubscribe → force human attention)
      → AIReplyDraft(status=DRAFT)
      → human edits/regenerates/rejects/approves in UI

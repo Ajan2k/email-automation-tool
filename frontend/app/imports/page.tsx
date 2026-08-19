@@ -42,8 +42,11 @@ export default function ImportsPage() {
       <h1>Import Contacts</h1>
       <div className="card" style={{ maxWidth: 640 }}>
         <p className="muted" style={{ marginTop: 0 }}>
-          Upload a <b>.xlsx</b> or <b>.csv</b> with columns: first_name, last_name, email, company,
-          job_title, website, linkedin, industry
+          Upload a <b>.xlsx</b> or <b>.csv</b>. Both layouts are supported:
+          the <b>Decision_Makers</b> export (emails, work_email, full_name, job_company_name,
+          job_company_size, linkedin_url, location_country, mobile_phone, skills, …) and the
+          simple layout (first_name, last_name, email, company, job_title, …).
+          Direct <b>work_email</b> is preferred; otherwise the first valid address in <b>emails</b> is used.
         </p>
         <input
           type="file"

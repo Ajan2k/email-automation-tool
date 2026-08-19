@@ -31,10 +31,15 @@ class Settings(BaseSettings):
     smtp_from_name: str = "Email Platform"
     smtp_use_tls: bool = True
 
-    # LLM
-    llm_api_key: str = ""
-    llm_model: str = "gpt-4o-mini"
-    llm_base_url: str = "https://api.openai.com/v1"
+    # LLM — Groq (OpenAI-compatible API)
+    groq_api_key: str = ""
+    llm_api_key: str = ""  # legacy alias; groq_api_key wins if both set
+    llm_model: str = "llama-3.3-70b-versatile"
+    llm_base_url: str = "https://api.groq.com/openai/v1"
+
+    @property
+    def effective_llm_api_key(self) -> str:
+        return self.groq_api_key or self.llm_api_key
 
     # Tracking / public URLs
     public_api_url: str = "http://localhost:8000"

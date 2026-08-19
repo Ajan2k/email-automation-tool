@@ -18,6 +18,9 @@ def list_contacts(
     search: str = "",
     industry: str = "",
     status: str = "",
+    country: str = "",
+    company_size: str = "",
+    job_title: str = "",
     company_id: int | None = None,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -30,13 +33,21 @@ def list_contacts(
                 Contact.email.ilike(like),
                 Contact.first_name.ilike(like),
                 Contact.last_name.ilike(like),
+                Contact.full_name.ilike(like),
                 Contact.job_title.ilike(like),
+                Contact.skills.ilike(like),
             )
         )
     if industry:
         stmt = stmt.where(Contact.industry.ilike(f"%{industry}%"))
     if status:
         stmt = stmt.where(Contact.status == status)
+    if country:
+        stmt = stmt.where(Contact.country.ilike(f"%{country}%"))
+    if company_size:
+        stmt = stmt.where(Contact.company_size == company_size)
+    if job_title:
+        stmt = stmt.where(Contact.job_title.ilike(f"%{job_title}%"))
     if company_id:
         stmt = stmt.where(Contact.company_id == company_id)
 
@@ -74,10 +85,16 @@ def create_contact(
         email=email,
         first_name=data.first_name,
         last_name=data.last_name,
+        full_name=data.full_name or f"{data.first_name} {data.last_name}".strip(),
+        gender=data.gender,
         job_title=data.job_title,
+        company_size=data.company_size,
         website=data.website,
         linkedin=data.linkedin,
         industry=data.industry,
+        country=data.country,
+        phone=data.phone,
+        skills=data.skills,
         tags=data.tags,
     )
     db.add(contact)

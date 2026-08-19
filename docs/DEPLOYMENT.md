@@ -14,7 +14,7 @@
 - New Web Service → connect the GitHub repo → root directory `backend`, Docker.
 - Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 - Environment: `DATABASE_URL`, `REDIS_URL`, `SECRET_KEY`, `SMTP_*`,
-  `LLM_API_KEY`, `PUBLIC_API_URL=https://<your-api>.onrender.com`,
+  `GROQ_API_KEY`, `PUBLIC_API_URL=https://<your-api>.onrender.com`,
   `CORS_ORIGINS=https://<your-app>.vercel.app`, `ENVIRONMENT=production`.
 
 ## 4. Render — Background Worker

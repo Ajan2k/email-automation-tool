@@ -14,7 +14,7 @@ Next.js (Vercel) ──▶ FastAPI (Render) ──▶ Supabase PostgreSQL
 
 ## Features
 
-- 📥 **Excel/CSV import** — validation, duplicate detection, preview, bulk insert
+- 📥 **Excel/CSV import** — supports the `Decision_Makers.xlsx` layout (work_email preference, semicolon email lists, float phone artifacts, linkedin_url, skills, countries) and simple layouts; validation, duplicate detection, preview, bulk insert
 - 👤 **Contact & company management** — server-side pagination, search, filters
 - 📝 **Templates** — `{{first_name}}`, `{{company_name}}`, … variable substitution with live preview
 - 🚀 **Campaigns** — draft → scheduled → running → completed, daily limits, rate control
@@ -22,7 +22,7 @@ Next.js (Vercel) ──▶ FastAPI (Render) ──▶ Supabase PostgreSQL
 - 📈 **Event-based tracking** — open pixel, click redirect, bounce handling, suppression list
 - 🔁 **Follow-up engine** — multi-step sequences that stop on reply/unsubscribe/bounce
 - 💬 **Conversation inbox** — inbound replies matched via RFC 5322 headers (`In-Reply-To` / `References`)
-- 🤖 **LLM reply drafts** — structured output (classification, draft, reason, needs-human flag) with keyword safety net
+- 🤖 **LLM reply drafts (Groq)** — `llama-3.3-70b-versatile` via Groq's OpenAI-compatible API; structured output (classification, draft, reason, needs-human flag) with keyword safety net
 - ✋ **Human-in-the-loop** — the AI **never** sends. The only send path is an authenticated human clicking *Approve & Send*
 - 📊 **Analytics dashboard** — delivery/open/click/reply/bounce rates
 - 🔐 **JWT auth**, structured JSON logging, tests (unit/integration/e2e), Docker, CI
@@ -69,8 +69,9 @@ python -m worker.main
 Generate test data:
 
 ```bash
-python scripts/generate_sample_contacts.py 500 > contacts.csv
-# then upload it on the /imports page
+python scripts/generate_sample_contacts.py 500 > contacts.csv           # simple layout
+python scripts/generate_decision_makers_sample.py 500 dm_sample.xlsx    # Decision_Makers layout
+# then upload either on the /imports page
 ```
 
 ## Run tests

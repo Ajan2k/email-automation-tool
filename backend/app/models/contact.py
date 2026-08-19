@@ -25,10 +25,16 @@ class Contact(Base):
     email: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
     first_name: Mapped[str] = mapped_column(String(255), default="")
     last_name: Mapped[str] = mapped_column(String(255), default="")
+    full_name: Mapped[str] = mapped_column(String(255), default="", index=True)
+    gender: Mapped[str] = mapped_column(String(16), default="")
     job_title: Mapped[str] = mapped_column(String(255), default="", index=True)
+    company_size: Mapped[str] = mapped_column(String(32), default="", index=True)
     website: Mapped[str] = mapped_column(String(255), default="")
     linkedin: Mapped[str] = mapped_column(String(255), default="")
     industry: Mapped[str] = mapped_column(String(255), default="", index=True)
+    country: Mapped[str] = mapped_column(String(128), default="", index=True)
+    phone: Mapped[str] = mapped_column(String(64), default="")
+    skills: Mapped[str] = mapped_column(String(2048), default="")  # semicolon-separated
     tags: Mapped[str] = mapped_column(String(1024), default="")  # comma-separated
     status: Mapped[ContactStatus] = mapped_column(Enum(ContactStatus), default=ContactStatus.ACTIVE, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

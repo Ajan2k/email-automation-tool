@@ -63,10 +63,16 @@ def _build_context(db: Session, conversation: Conversation) -> str:
     lines = [
         f"Contact: {contact.first_name} {contact.last_name} <{contact.email}>",
         f"Job title: {contact.job_title}",
-        f"Company: {contact.company.name if contact.company else 'unknown'}",
-        "",
-        "Conversation so far:",
+        f"Company: {contact.company.name if contact.company else 'unknown'}"
+        + (f" ({contact.company_size} employees)" if contact.company_size else ""),
     ]
+    if contact.industry:
+        lines.append(f"Industry: {contact.industry}")
+    if contact.country:
+        lines.append(f"Country: {contact.country}")
+    if contact.skills:
+        lines.append(f"Known skills: {contact.skills[:200]}")
+    lines += ["", "Conversation so far:"]
     for m in messages:
         who = "US" if m.direction == EmailDirection.OUTBOUND else "THEM"
         lines.append(f"--- {who} ({m.created_at}) ---\nSubject: {m.subject}\n{m.body}\n")
@@ -74,9 +80,10 @@ def _build_context(db: Session, conversation: Conversation) -> str:
 
 
 def _call_llm(context: str) -> dict:
+    """Call Groq's OpenAI-compatible chat completions API."""
     response = httpx.post(
         f"{settings.llm_base_url}/chat/completions",
-        headers={"Authorization": f"Bearer {settings.llm_api_key}"},
+        headers={"Authorization": f"Bearer {settings.effective_llm_api_key}"},
         json={
             "model": settings.llm_model,
             "messages": [
