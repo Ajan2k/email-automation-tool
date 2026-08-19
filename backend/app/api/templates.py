@@ -69,8 +69,9 @@ def preview_template(
         contact = db.get(Contact, data.contact_id)
         if contact is None or contact.owner_id != user.id:
             raise HTTPException(status_code=404, detail="Contact not found")
-        variables = contact_variables(contact, contact.company)
+        variables = contact_variables(contact, contact.company, user)
     else:
+        sender = user.full_name.strip() if (user and user.full_name) else "InfiniteTechAI Team"
         variables = {
             "first_name": "Sarah",
             "last_name": "Chen",
@@ -84,6 +85,11 @@ def preview_template(
             "skills": "machine learning;product strategy",
             "phone": "+14165550100",
             "email": "sarah@abc.ai",
+            "sender_name": sender,
+            "from_name": sender,
+            "owner_name": sender,
+            "your_name": sender,
+            "name": sender,
         }
     return {
         "subject": render(template.subject, variables),

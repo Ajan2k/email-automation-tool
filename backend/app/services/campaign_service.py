@@ -60,6 +60,7 @@ def launch_campaign(db: Session, campaign: Campaign) -> int:
         ).all()
     ]
 
+    owner = db.get(User, campaign.owner_id)
     queued = 0
     for contact_id in contact_ids:
         contact = db.get(Contact, contact_id)
@@ -68,7 +69,7 @@ def launch_campaign(db: Session, campaign: Campaign) -> int:
         if contact.email in suppressed:
             continue
 
-        variables = contact_variables(contact, contact.company)
+        variables = contact_variables(contact, contact.company, owner)
         email = EmailMessage(
             owner_id=campaign.owner_id,
             campaign_id=campaign.id,

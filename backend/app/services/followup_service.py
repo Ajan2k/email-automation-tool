@@ -17,6 +17,7 @@ from app.models import (
     EmailStatus,
     FollowupSequence,
     Template,
+    User,
 )
 from app.queue.producer import enqueue_send_email
 
@@ -95,7 +96,8 @@ def schedule_due_followups(db: Session, now: datetime | None = None) -> int:
             template = db.get(Template, step.template_id)
             if template is None:
                 continue
-            variables = contact_variables(contact, contact.company)
+            seq_owner = db.get(User, seq.owner_id)
+            variables = contact_variables(contact, contact.company, seq_owner)
             email = EmailMessage(
                 owner_id=seq.owner_id,
                 campaign_id=seq.campaign_id,
