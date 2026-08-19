@@ -26,7 +26,7 @@ class Campaign(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[CampaignStatus] = mapped_column(
-        Enum(CampaignStatus), default=CampaignStatus.DRAFT, index=True
+        Enum(CampaignStatus, native_enum=False), default=CampaignStatus.DRAFT, index=True
     )
     scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     daily_limit: Mapped[int] = mapped_column(Integer, default=500)

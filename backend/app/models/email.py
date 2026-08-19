@@ -33,9 +33,11 @@ class EmailMessage(Base):
     )
 
     direction: Mapped[EmailDirection] = mapped_column(
-        Enum(EmailDirection), default=EmailDirection.OUTBOUND
+        Enum(EmailDirection, native_enum=False), default=EmailDirection.OUTBOUND
     )
-    status: Mapped[EmailStatus] = mapped_column(Enum(EmailStatus), default=EmailStatus.QUEUED, index=True)
+    status: Mapped[EmailStatus] = mapped_column(
+        Enum(EmailStatus, native_enum=False), default=EmailStatus.QUEUED, index=True
+    )
 
     subject: Mapped[str] = mapped_column(String(998), default="")
     body: Mapped[str] = mapped_column(Text, default="")

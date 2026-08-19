@@ -12,6 +12,15 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
+  async function getErrorMessage(res: Response, fallback: string): Promise<string> {
+    try {
+      const data = await res.json();
+      return data.detail || fallback;
+    } catch {
+      return `${fallback} (${res.status} ${res.statusText || "Server Error"})`;
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -23,11 +32,11 @@ export default function LoginPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password, full_name: name }),
         });
-        if (!res.ok) throw new Error((await res.json()).detail || "Registration failed");
+        if (!res.ok) throw new Error(await getErrorMessage(res, "Registration failed"));
       }
       const form = new URLSearchParams({ username: email, password });
       const res = await fetch("/api/auth/login", { method: "POST", body: form });
-      if (!res.ok) throw new Error((await res.json()).detail || "Login failed");
+      if (!res.ok) throw new Error(await getErrorMessage(res, "Login failed"));
       const data = await res.json();
       setToken(data.access_token);
       router.push("/dashboard");

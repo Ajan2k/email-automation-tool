@@ -20,17 +20,13 @@ from app.api import (
 from app.core.config import settings
 from app.core.exceptions import AppError
 from app.core.logging import setup_logging
-from app.database.base import Base
-from app.database.connection import engine
+from app.database.connection import init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
-    # In production use Alembic migrations; create_all keeps local dev simple.
-    import app.models  # noqa: F401
-
-    Base.metadata.create_all(bind=engine)
+    init_db()
     yield
 
 

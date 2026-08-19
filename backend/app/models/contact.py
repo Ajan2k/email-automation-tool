@@ -36,7 +36,9 @@ class Contact(Base):
     phone: Mapped[str] = mapped_column(String(64), default="")
     skills: Mapped[str] = mapped_column(String(2048), default="")  # semicolon-separated
     tags: Mapped[str] = mapped_column(String(1024), default="")  # comma-separated
-    status: Mapped[ContactStatus] = mapped_column(Enum(ContactStatus), default=ContactStatus.ACTIVE, index=True)
+    status: Mapped[ContactStatus] = mapped_column(
+        Enum(ContactStatus, native_enum=False), default=ContactStatus.ACTIVE, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     company = relationship("Company", back_populates="contacts")

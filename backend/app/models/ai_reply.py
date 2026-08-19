@@ -25,7 +25,7 @@ class AIReplyDraft(Base):
     )
 
     status: Mapped[AIReplyStatus] = mapped_column(
-        Enum(AIReplyStatus), default=AIReplyStatus.DRAFT, index=True
+        Enum(AIReplyStatus, native_enum=False), default=AIReplyStatus.DRAFT, index=True
     )
     classification: Mapped[str] = mapped_column(String(64), default="")
     draft_subject: Mapped[str] = mapped_column(String(998), default="")

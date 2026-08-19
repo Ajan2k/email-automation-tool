@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from rq import Worker
 
 from app.core.logging import setup_logging
-from app.database.connection import SessionLocal
+from app.database.connection import SessionLocal, init_db
 from app.queue.redis import EMAIL_QUEUE_NAME, get_redis
 
 logger = logging.getLogger("worker")
@@ -70,6 +70,7 @@ def scheduler_loop() -> None:
 
 def main() -> None:
     setup_logging()
+    init_db()
     thread = threading.Thread(target=scheduler_loop, daemon=True, name="scheduler")
     thread.start()
     logger.info("scheduler thread started; starting RQ worker on queue %s", EMAIL_QUEUE_NAME)

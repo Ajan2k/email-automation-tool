@@ -33,10 +33,10 @@ class Conversation(Base):
 
     subject: Mapped[str] = mapped_column(String(998), default="")
     status: Mapped[ConversationStatus] = mapped_column(
-        Enum(ConversationStatus), default=ConversationStatus.OPEN, index=True
+        Enum(ConversationStatus, native_enum=False), default=ConversationStatus.OPEN, index=True
     )
     classification: Mapped[ConversationClassification] = mapped_column(
-        Enum(ConversationClassification), default=ConversationClassification.UNCLASSIFIED
+        Enum(ConversationClassification, native_enum=False), default=ConversationClassification.UNCLASSIFIED
     )
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

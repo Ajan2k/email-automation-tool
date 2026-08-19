@@ -20,7 +20,7 @@ class ImportJob(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     filename: Mapped[str] = mapped_column(String(512))
-    status: Mapped[ImportStatus] = mapped_column(Enum(ImportStatus), default=ImportStatus.PENDING)
+    status: Mapped[ImportStatus] = mapped_column(Enum(ImportStatus, native_enum=False), default=ImportStatus.PENDING)
     total_rows: Mapped[int] = mapped_column(Integer, default=0)
     valid_rows: Mapped[int] = mapped_column(Integer, default=0)
     invalid_rows: Mapped[int] = mapped_column(Integer, default=0)
