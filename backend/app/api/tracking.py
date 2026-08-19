@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse, Response
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.database.connection import get_db
 from app.services.tracking_service import record_click, record_open, record_unsubscribe
 
@@ -31,7 +32,7 @@ def track_open(tracking_id: str, request: Request, db: Session = Depends(get_db)
 @router.get("/api/tracking/click/{tracking_id}")
 @router.get("/api/v1/tracking/click/{tracking_id}")
 def track_click(tracking_id: str, url: str = "", db: Session = Depends(get_db)):
-    target_url = url.strip() or "https://infinitetechai.com"
+    target_url = url.strip() or settings.public_api_url
     record_click(db, tracking_id, target_url)
     if not target_url.startswith(("http://", "https://")):
         target_url = "https://" + target_url
